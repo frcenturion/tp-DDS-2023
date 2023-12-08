@@ -1,0 +1,134 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/comunidad": {
+      "post": {
+        "tags": [
+          "Comunidad"
+        ],
+        "summary": "Calcular puntaje de una comunidad",
+        "operationId": "calcularPuntajeComunidad",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Comunidad"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "deprecated": false,
+        "security": []
+      }
+    },
+    "/miembro": {
+      "post": {
+        "tags": [
+          "Miembro"
+        ],
+        "summary": "Calcular puntaje de un miembro",
+        "operationId": "calcularPuntajeMiembro",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Miembro"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "deprecated": false,
+        "security": []
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Comunidad": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "puntajesDeMiembros": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            }
+          }
+        }
+      },
+      "Incidente": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "fechaApertura": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "fechaCierre": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "idCreador": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "idCerrador": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "idPrestacion": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "required": [
+          "idCreador",
+          "idCerrador",
+          "idPrestacion"
+        ]
+      },
+      "Miembro": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "puntaje": {
+            "type": "number",
+            "format": "double"
+          },
+          "incidentes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Incidente"
+            }
+          },
+          "idMiembro": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "required": [
+          "idMiembro"
+        ]
+      }
+    }
+  }
+}

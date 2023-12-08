@@ -1,0 +1,34 @@
+'''''''''''''''
+'' Validador ''
+'''''''''''''''
+
+Interface Validador {
+    + esValida(String, String): Bool
+}
+
+class Validador10kContraseniasMasUsadas implements Validador {
+    + esValida(String, String): Bool
+    + estaEn10kContraseniasMasUsadas(String): Bool
+}
+
+class ValidadorComplejidad implements Validador {
+    + esValida(String, String): Bool
+    + tieneCaracteresConsecutivos(String, String): Bool
+}
+
+class ValidadorCredencialPorDefecto implements Validador {
+    + esValida(String, String): Bool
+}
+
+class ValidadorLongitud implements Validador {
+    + esValida(String, String): Bool
+}
+
+class ValidadorDeContrasenias {
+    - validadores: List<Validador>
+    
+    + validadorDeContrasenias(List<Validador> validadores)
+    + esValida(String, String): Bool
+}
+
+ValidadorDeContrasenias -->"*" Validador

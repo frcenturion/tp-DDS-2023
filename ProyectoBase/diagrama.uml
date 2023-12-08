@@ -1,0 +1,351 @@
+Dudas:
+
+- ¿Por qué Incidente tiene que conocer a Miembro? 
+- ¿abrirIncidente debería hacer new Incidente() o eso se hace 
+de alguna manera en la capa de controladores?
+- ¿Todas las instanciaciones se hacen en la capa de controladores?
+- Por qué nos habías mencionado esto?: "Revisar como entiende la comunidad si el incidente es de interés o no"
+El enunciado dice: "Cualquier servicio que presente un incidente en la 
+entidad prevista se considera de interés para la persona. Este interés es 
+único por persona y no varía según su afiliación a una u otra comunidad"
+
+Para las notificaciones Sin Apuros, implementamos una clase (llamada Notificacion) donde tenes el incidente, el miembro al cual se debe enviar y si fue enviada o no
+Entonces cada vez que se abra un incidente (por ejemplo), se va a instanciar una de estas por cada miembro al que se deba enviar, y despues
+se nos ocurrio que esto debe persistir en algun lado para que despues un cron task agarre todas las notificaciones y arme un resumen
+
+class Notificacion {
+    - incidente: Incidente
+    - fueEnviada: Bool
+    - miembro:  Miembro
+}
+
+La idea de guardar las notificaciones es que sepamos quienes son los miembros que estan pendientes de enviarles notificacion, para que el Cron les envie a ellos las notificaciones
+y no a quienes ya les fue enviada.
+Nuestra duda era como dejar plasmado a nivel diagrama de clases que guardamos las notificiaciones para que despues sean usadas por el cron task.
+
+
+
+@startuml
+
+''''''''''''''''''''''''
+'' Servicios Públicos ''
+''''''''''''''''''''''''
+
+'Empresa u organismo de control'
+class Organismo {
+    - nombre: String
+    - prestadoras: List<Prestadora>
+}
+Organismo -->"*" Prestadora
+
+class Prestadora {
+    - nombre: String
+    - designado: Miembro
+    - entidades: List<Entidad>
+
+    + designar(Miembro): void
+    + enviarInformacion() :void
+}
+Prestadora --> Miembro
+Prestadora -->"*" Entidad
+
+class Localizacion {
+    - provincia: Provinciad
+    - municipio: Municipio
+    - departamento: Departamento
+    - centroide: Centroide
+}
+
+Localizacion --> Centroide
+
+class Centroide {
+    - latitud: Double
+    - longitud: Double
+}
+
+class Entidad {
+    - nombre: String
+    - descripcion: String
+    - ubicacion: Localizacion
+    - tipo: tipoEntidad
+    - establecimientos: List<Establecimiento>
+
+    + darDeBaja(): void
+    + promedioDeTiempoDeCierreDeIncidentes(): float
+    + cantidadDeIncidentesReportadosEnLaSemana() :float
+}
+Entidad -d->"*" Establecimiento
+Entidad --> tipoEntidad
+Entidad -d-> Localizacion
+
+enum tipoEntidad {
+    Transporte
+    Banco
+    Supermercado
+}
+
+'Fijarse si la estación debe conocer a las líneas a las que pertenece'
+class Establecimiento {
+    - nombre:       String
+    - ubicacion:    Localizacion
+    - prestaciones: List<PrestacionDeServicio>
+
+    + agregarPrestacion(PrestacionDeServicio): void
+    + incidentes(): List<Incidentes>
+    + cantidadDeIncidentesReportadosEnLaSemana() :int
+}
+Establecimiento -d->"*" PrestacionDeServicio
+Establecimiento --> Localizacion
+
+'''''''''''''''
+'' Servicios ''
+'''''''''''''''
+
+Interface Servicio {
+    + darInformacion(): String
+}
+
+class Banio implements Servicio {
+    - nombre: String
+    - genero: Boolean
+    + darInformacion(): String
+}
+
+class MedioDeElevacion implements Servicio {
+    - nombre:       String
+    - tramoInicial: float
+    - tramoFinal:   float
+    + darInformacion(): String
+}
+
+class PrestacionDeServicio {
+    - servicio:       Servicio
+    - estaDisponible: Bool
+    - miembrosInteresados: List<Miembro>
+    
+    + cantidadDeIncidentesReportadosEnLaSemana() :int
+    + agregarMiembroInteresado(Miembro): void
+    + eliminarMiembroInteresado(Miembro): void
+    + yaSeContemplaAlIncidente(Incidente,List<Incidente>): bool
+    + pasaronMenosDe24h(LocalDateTime,LocalDateTime): bool
+}
+PrestacionDeServicio -d-> Servicio
+PrestacionDeServicio -u->"*" Miembro
+
+'''''''''''''''
+'' Usuarios  ''
+'''''''''''''''
+
+class Miembro {
+    - nombre:      String
+    - apellido:    String
+    - contrasenia: String
+    - email:       String
+    - notificador: Notificador
+    - estrategiaDeAviso: EstrategiaDeAviso
+    - rolesPorPrestacion: List<Rol>
+    - comunidadesDeLasQueFormaParte: List<Comunidad>
+    - puntos: int
+
+    + darDeBajaComunidad(Comunidad, Miembro):            void
+    + solicitarAltaDeComunidad(Miembro, String, String): void /'nombre y descripción'/
+    + abrirIncidente(Observaciones, PrestacionAfectada): void
+    + cerrarIncidente(Incidente): void
+    + esMiembroDe(Comunidad): Bool
+    + serAvisado(String): void
+}
+Miembro .r.>"<<use>>" Comunidad
+Miembro --> Notificador
+Miembro --> EstrategiaDeAviso
+Miembro -l->"*" Rol
+Miembro -->"*" Comunidad
+Miembro ..> Incidente
+Miembro --> Localizacion
+
+/'
+method abrirIncidente(Incidente incidente) {
+    comunidades = incidente.miembrocreador.comunidades;
+    for comunidad in comunidades:
+        for miembro in comunidad.miembros:
+            miembro.serAvisado(incidente);
+            //miembro.estrategia.avisar(miembro,"se creo un incidente")
+    
+    return incidente;
+}
+
+
+method serAvisado(Incidente incidente) {
+    this.estrategia.avisar(incidente, self)
+}
+
+EstrategiaDeAviso:
+CuandoSuceden:
+method avisar(Incidente incidente, Miembro miembro) {
+    mensaje = this.resumen(incidente);
+    logica de avisar (miembro, mensaje);
+}
+
+SinApuros:
+method avisar(Incidente incidente, Miembro miembro) {
+    List<Incidente> incidentes = obtenerIncidentes();
+
+    mensaje = this.resumen(incidentes);
+    logica de avisar (miembro, mensaje);
+}
+
+
+method resumen()
+'/
+
+
+class Notificacion {
+    - incidente: Incidente
+    - fueEnviada: Bool
+    - fueVisto: Bool
+    - miembro:  Miembro
+    - fecha: Date
+
+    + serVisto(): void
+}
+Notificacion --> Incidente
+
+Interface EstrategiaDeAviso {
+    + avisar(Incidente, Miembro): Notificacion
+}
+EstrategiaDeAviso ..> Incidente
+
+class CuandoSuceden implements EstrategiaDeAviso{
+    + avisar(Incidente, Miembro): Notificacion
+}
+CuandoSuceden ..>"<<use>>" Notificacion 
+
+class SinApuros implements EstrategiaDeAviso{
+    - horarios: List<DateTime>
+    + avisar(Incidente, Miembro): Notificacion
+}
+SinApuros ..> "<<use>>" Notificacion 
+
+class EnviadorDeNotificaciones{
+    + enviarNotificaciones(List<Notificacion>): void
+}
+EnviadorDeNotificaciones ..>"<<use>>" Notificacion
+
+
+
+class Rol {
+    - prestacionDeServicio: PrestacionDeServicio
+    - esAfectado: Boolean
+
+    + noEsAfectado(): void
+}
+
+
+class Comunidad {
+    - nombre:      String
+    - descripcion: String
+    - miembros:    List<Miembro>
+    - admins:      List<Miembro>
+    - incidentes:  List<Incidente>
+
+    + esAdmin(Miembro):   Bool
+    + agregarMiembro(Miembro) : void
+    + mostrarInformacion(): void
+}
+Comunidad -l->"*" Miembro
+Comunidad -->"*" Incidente
+
+''''''''''''''''
+'' Incidentes ''
+''''''''''''''''
+
+class Incidente {
+    - fechaApertura: LocalDateTime
+    - estado:        List<EstadoPorComunidad>
+    - observaciones: String
+    - prestacionAfectada: PrestacionDeServicio
+    - miembroCreador: Miembro
+
+    + cerrar(): void
+    + tiempoDeCierre(): void 
+}
+Incidente -l-> PrestacionDeServicio
+Incidente --> "*" EstadoPorComunidad
+Incidente --> Miembro
+
+class EstadoPorComunidad {
+    - comunidad: Comunidad
+    - estaAbierto: Bool
+    - fechaCierre: LocalDateTime            'la fecha de cierre es particular para cada comunidad'
+    - miembroQueLoCerro: Miembro
+}
+EstadoPorComunidad --> Comunidad
+
+Interface Notificador {
+    + enviarNotificacion(Miembro): bool
+}
+
+class NotificadorWhatsapp implements Notificador {
+    - adapter: AdapterWhatsapp
+    + enviarNotificacion(Miembro): bool
+}
+NotificadorWhatsapp --> AdapterWhatsapp
+
+class NotificadorEmail implements Notificador {
+    - adapter: AdapterEmail
+    + enviarNotificacion(Miembro): bool
+}
+NotificadorEmail --> AdapterEmail
+
+Interface AdapterWhatsapp{
+    + enviarWhatsapp(Miembro): bool
+}
+
+Interface AdapterEmail{
+    + enviarEmail(Miembro): bool
+}
+
+class AdapterTwilio implements AdapterWhatsapp{
+    + enviarWhatsapp(Miembro): bool
+}
+
+class AdapterAngusMail implements AdapterEmail{
+    + enviarEmail(Miembro): bool
+}
+
+class Ranking{
+    -entidades: List<Entidad>
+    -criterio: CriterioRanking
+
+    +obtener(): List<Entidad>
+}
+Ranking --> CriterioRanking
+Ranking -->"*" Entidad
+
+Interface CriterioRanking{
+    + evaluar(Entidad):float
+}
+
+class MayorCantidadDeIncidentesReportadosEnLaSemana implements CriterioRanking{
+    + evaluar(Entidad):float
+}
+
+class MayorPromedioDeTiempoDeCierreDeIncidentes implements CriterioRanking{
+    + evaluar(Entidad):float
+}
+
+class ArmadorDeInformes{
+    - csvWriter: AdapterCSVWriter
+    + armarInforme(Ranking): void
+}
+ArmadorDeInformes --> Ranking
+ArmadorDeInformes --> AdapterCSVWriter
+
+Interface AdapterCSVWriter{
+    + armarInformeDeRanking(List<String>):void
+}
+
+class AdapterOpenCSV implements AdapterCSVWriter{
+    +armarInformeDeRanking(List<String>):void
+}
+
+@enduml

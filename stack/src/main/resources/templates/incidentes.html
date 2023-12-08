@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <style>
+        /* Agrega tu estilo aquí */
+        .table-container {
+            margin: 20px;
+        }
+
+        .content-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .content-table th, .content-table td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        .content-table th {
+            background-color: #f2f2f2;
+        }
+
+        .form-container {
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <form action="/incidentes" method="get">
+        <label for="idComunidad">Id Comunidad:</label>
+        <input type="text" id="idComunidad" name="idComunidad" />
+        <button type="submit">Buscar</button>
+    </form>
+</div>
+
+<div class="table-container" th:if="${not #lists.isEmpty(incidentesConEstado)}">
+    <table class="content-table">
+        <thead>
+        <tr>
+            <th>Descripcion</th>
+            <th>Observaciones</th>
+            <th>Fecha de alta</th>
+            <th>Fecha de cierre</th>
+            <th>Miembro creador</th>
+            <th>Miembro cerrador</th>
+            <th>Estado</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="incidenteConEstado : ${incidentesConEstado}">
+            <td th:text="${incidenteConEstado.incidente.descripcion}"></td>
+            <td th:text="${incidenteConEstado.incidente.observaciones}"></td>
+            <td th:text="${incidenteConEstado.incidente.tiempoInicial != null ? #temporals.format(incidenteConEstado.incidente.tiempoInicial, 'yyyy-MM-dd') : '-'}"></td>
+
+            <td th:text="${incidenteConEstado.estado != null ? incidenteConEstado.estado.fechaDeCierre != null ? #temporals.format(incidenteConEstado.incidente.tiempoInicial, 'yyyy-MM-dd') : '-' : '-'}"></td>
+
+
+            <td th:text="${incidenteConEstado.incidente.miembroCreador.nombre}"></td>
+            <td th:text="${incidenteConEstado.estado != null ? incidenteConEstado.estado.cerrador != null ? incidenteConEstado.estado.cerrador.nombre : '-' : '-'}"></td>
+            <td th:text="${incidenteConEstado.estado != null ? incidenteConEstado.estado.estaAbierto != null ? (incidenteConEstado.estado.estaAbierto ? 'Abierto' : 'Cerrado') : '-' : '-'}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>

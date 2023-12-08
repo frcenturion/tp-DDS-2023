@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/imagenes/check.ico" type="image/x-icon">
+    {{#block "titulo-css"}}
+    {{/block}}
+
+</head>
+<body>
+
+<div class="navbar">
+    <div class="navbar-logo">
+        <img src="/imagenes/logo_blanco.png" alt="logo-img">
+    </div>
+    <ul>
+        <li>
+            <a href="/home">Inicio</a>
+        </li>
+
+        {{#if (eq rol "ADMINISTRADOR")}}
+        <li>
+            <a href="#">Carga de datos</a>
+            <div class="dropdown-menu">
+                <a href="/carga-prestadoras-organismos">Entidades prestadoras y Organismos de control</a>
+                <a href="/entidades/crear">Crear entidad</a>
+                <a href="/establecimientos/crear">Crear establecimiento</a>
+                <a href="/servicios/crear">Crear prestación de servicio</a>
+            </div>
+        </li>
+
+            <li>
+                <a href="#">Administración</a>
+                <div class="dropdown-menu">
+                    <a href="/entidades">Entidades</a>
+                    <a href="/establecimientos">Establecimientos</a>
+                    <a href="/organismos">Organismos de control</a>
+                    <a href="/servicios">Servicios</a>
+
+                </div>
+            </li>
+        {{/if}}
+
+
+        {{#if (eq rol "MIEMBRO")}}
+        <li>
+            <a href="#">Incidentes</a>
+            <div class="dropdown-menu">
+                <a href="/incidentes/abrir">Abrir</a>
+                <a href="/incidentes/cerrar">Cerrar</a>
+                <a href="/incidentes">Consultar incidentes</a>
+                <a href="/rankings">Rankings</a>
+            </div>
+        </li>
+        {{/if}}
+
+        {{#if (or (eq rol "ADMINISTRADOR") (eq rol "MIEMBRO"))}}
+            <li>
+                <a href="/servicios">Servicios</a>
+                <div class="dropdown-menu">
+                    <a href="/servicios">Listado de servicios</a>
+                    <a href="/servicios/mis-servicios">Mis servicios de interés</a>
+                </div>
+            </li>
+        {{/if}}
+
+
+        {{#if (eq rol "MIEMBRO")}}
+        <li>
+            <a href="#">Comunidades</a>
+            <div class="dropdown-menu">
+                <a href="/comunidades/crear">Crear</a>
+                <a href="/comunidades/unirse">Unirse</a>
+                <a href="/comunidades/mis-comunidades">Mis comunidades</a>
+            </div>
+        </li>
+        {{/if}}
+
+        {{#if (eq rol "EMPRESA")}}
+            <li>
+                <a href="/miembro/designar">Designar miembro</a>
+            </li>
+        {{/if}}
+
+        <li>
+            <img src="/imagenes/user.png" alt="logo-img" style="width: 30px; height: 30px">
+            <a href="#"></a>
+            <div class="dropdown-menu">
+                <a href="/logout">Log out</a>
+
+                {{#if (or (eq rol "ADMINISTRADOR") (eq rol "MIEMBRO"))}}
+
+                    <a href="/miembro/eliminar">Borrar cuenta</a>
+                    <a href="#" id="editar-perfil">Editar perfil</a>
+
+                {{/if}}
+
+            </div>
+        </li>
+
+        {{#if (eq rol "MIEMBRO")}}
+        <li>
+            <a href="#" id="editar-notificaciones">
+                <img src="/imagenes/bell.png" alt="logo-img" style="width: 30px; height: 30px">
+            </a>
+        </li>
+        {{/if}}
+
+        <li>
+            <!-- Botón de modo oscuro -->
+            <div class="mode-toggle" id="modo-oscuro"></div>
+        </li>
+    </ul>
+</div>
+
+{{#block "contenido"}}
+{{/block}}
+
+</body>
+</html>
+
+<script src="/js/script_modoOscuro.js"></script>
+
+<script>
+
+    document.getElementById("editar-perfil").addEventListener("click", function() {
+        // Obtener el ID del miembro desde el atributo de datos
+        var idMiembro = findCookieByName("id_miembro");
+
+
+        console.log(idMiembro);
+
+        // Construir la URL dinámicamente
+        var url = "/miembro/editar/" + idMiembro;
+
+        // Redirigir al usuario a la URL construida
+        window.location.href = url;
+    });
+
+    document.getElementById("editar-notificaciones").addEventListener("click", function() {
+        // Obtener el ID del miembro desde el atributo de datos
+        var idMiembro = findCookieByName("id_miembro");
+
+
+        console.log(idMiembro);
+
+        // Construir la URL dinámicamente
+        var url = "/miembro/editar-notificaciones/" + idMiembro;
+
+        // Redirigir al usuario a la URL construida
+        window.location.href = url;
+    });
+
+
+
+    // Función para buscar una cookie por nombre
+    function findCookieByName(name) {
+        const cookies = document.cookie.split('; ');
+
+        const cookie = cookies.find(cookie => {
+            const [cookieName] = cookie.split('=');
+            return cookieName === name;
+        });
+
+        return cookie ? cookie.split('=')[1] : null;
+    }
+
+</script>

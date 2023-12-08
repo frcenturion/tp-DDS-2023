@@ -1,0 +1,8 @@
+DUDAS:
+
+1. Revisar tema de incidentes cuando un usuario pertenece a varias comunidades
+
+2. Tenemos que implementar el envio de mails y whatsapp para esta entrega?
+
+3. Hacer una clase intermedia que sea Incidente x comunidad? Esto porque los incidentes se cierran en cada
+comunidad

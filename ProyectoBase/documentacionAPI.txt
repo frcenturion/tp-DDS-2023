@@ -1,0 +1,73 @@
+openapi: 3.0.0
+info:
+  title: API de Miembro
+  version: 1.0.0
+servers:
+  - url: http://localhost:7000  # La URL de tu servidor
+    description: Servidor local  # Una descripción opcional
+paths:
+  /miembro:
+    get:
+      summary: Obtener el puntaje de un miembro
+      parameters:
+        - in: query
+          name: idMiembro
+          schema:
+            type: integer
+          description: ID del miembro.
+        - in: query
+          name: puntaje
+          schema:
+            type: number
+            format: double
+          description: Puntaje del miembro (valor Double).
+        - in: query
+          name: incidentes
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                idCreador:
+                  type: integer
+                idCerrador:
+                  type: integer
+                idPrestacion:
+                  type: integer
+                fechaApertura:
+                  type: string
+                  format: date-time
+                fechaCierre:
+                  type: string
+                  format: date-time
+          description: Lista de incidentes del miembro.
+      responses:
+        '200':
+          description: Respuesta exitosa
+          content:
+            application/json:
+              schema:
+                type: number
+                format: double
+        # Agrega aquí otras respuestas posibles, como '400' para errores de solicitud, etc
+
+  /comunidad:
+    get:
+      summary: Obtener el puntaje promedio de la comunidad
+      parameters:
+        - in: query
+          name: puntajesDeMiembros
+          schema:
+            type: array
+            items:
+              type: integer
+          description: Lista de puntajes de miembros.
+      responses:
+        '200':
+          description: Respuesta exitosa
+          content:
+            application/json:
+              schema:
+                type: number
+                format: double
+        # Agrega aquí otras respuestas posibles para /comunidad.

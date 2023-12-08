@@ -1,0 +1,121 @@
+{{#partial "titulo-css" }}
+    <title>Crear servicio</title>
+    <link rel="stylesheet" href="/css/styles_registroComunidad.css">
+{{/partial}}
+
+
+{{#partial "contenido" }}
+<div class="container">
+
+    <h1 class="center-label">{{#if prestacion}}Editar servicio{{else}}Creación de servicios{{/if}}</h1>
+    <form id="comunidadForm" method="POST" {{#if prestacion}} action="/servicios/editar/{{prestacion.idPrestacion}}" {{else}} action="/servicios" {{/if}}>
+
+        <div class="input-container">
+                <label for="nombre">Nombre</label>
+                <input
+                        type="text"
+                        name="nombre"
+                        placeholder="Ingrese el nombre del servicio"
+                        {{#if prestacion}}
+                            value="{{prestacion.getServicio.getNombre}}"
+                        {{/if}}
+                        name="nombre"
+                        id="nombre"
+                        required
+                />
+        </div>
+
+        <div class="input-container">
+            <label for="establecimiento"><b>Establecimiento</b></label>
+            <select id="establecimiento" name="establecimiento" class="custom-select" required>
+
+
+
+                <option value="" disabled selected>Seleccione el establecimiento donde se presta el servicio</option>
+
+                {{#each establecimientos}}
+                    <option value="{{this.idEstablecimiento}}">{{this.nombre}}</option>
+                {{/each}}
+
+            </select>
+        </div>
+
+        <div class="input-container">
+            <label for="tipo-servicio"><b>Tipo de servicio</b></label>
+            <select id="tipo-servicio" name="tipo-servicio" class="custom-select" required>
+
+                <option value="" disabled selected>Seleccione el tipo de servicio</option>
+
+                <option value="Banio">Baño</option>
+                <option value="MedioDeElevacion">Medio de Elevación</option>
+            </select>
+        </div>
+
+
+
+        <div class="informacion-adicional" id="informacion-adicional">
+
+        </div>
+
+
+
+
+       <!-- <div class="input-container">
+            <label for="genero"><b>Genero</b></label>
+            <input
+                    type="text"
+                    placeholder="Ingrese el género"
+                    name="genero"
+                    id="genero"
+                    required
+            />
+        </div>
+
+
+        <div class="input-container">
+            <label for="tramo-inicial"><b>Tramo inicial en mts</b></label>
+            <input
+                    type="number"
+                    placeholder="Ingrese el tramo inicial"
+                    name="tramo-inicial"
+                    id="tramo-inicial"
+                    required
+            />
+        </div>
+
+        <div class="input-container">
+            <label for="tramo-final"><b>Tramo final en mts</b></label>
+            <input
+                    type="number"
+                    placeholder="Ingrese el tramo final"
+                    name="tramo-final"
+                    id="tramo-final"
+                    required
+            />
+        </div>-->
+
+
+
+
+
+
+
+        <!--Aca agregamos informacion extra depenidendo de que tipo de servicio se eligio--> <!--TODO-->
+
+
+
+
+
+
+
+        <button type="submit">Crear servicio</button>
+    </form>
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="/js/script_servicios.js"></script>
+
+{{/partial}}
+
+{{> templates/navbar }}

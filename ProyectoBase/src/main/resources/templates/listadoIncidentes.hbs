@@ -1,0 +1,94 @@
+{{#partial "titulo-css" }}
+    <title>Listado y Consulta de Incidentes</title>
+    <link rel="stylesheet" href="/css/styles_listadoIncidentes.css">
+{{/partial}}
+
+
+{{#partial "contenido" }}
+
+<div class="container">
+    <h1 class="center-label">Consulta de incidentes</h1>
+
+        <div class="input-container">
+            <label for="opcion">¿Qué incidentes deseas ver?</label>
+            <select id="opcion" name="opcion" class="custom-select" required>
+
+                <option value="" disabled selected>Seleccione una opción</option>
+                <option value="servicios-interes">Incidentes vinculados a mis servicios de interés</option>
+                <option value="servicios-comunidad">Incidentes de comunidad</option>
+
+            </select>
+        </div>
+
+
+        <div class="input-container" id="comunidades-container">
+
+            <label for="comunidad-incidente">Comunidad</label>
+            <select id="comunidad-incidente" name="comunidad-incidente" class="custom-select" required>
+
+                <option value="" disabled selected>Seleccione la comunidad de la que desea consultar los incidentes</option>
+                {{#each comunidades}}
+                    <option value="{{this.idComunidad}}">{{this.nombre}}</option>
+                {{/each}}
+
+            </select>
+        </div>
+
+        <div class="input-container" id="filtros">
+
+            <div class="radio-group">
+                <label for="filtros">Filtros:</label>
+                <input type="radio" id="incidentes-abiertos" name="tipo-incidente" value="incidentes-abiertos">
+                <label for="incidentes-abiertos">Abierto</label>
+
+                <input type="radio" id="incidentes-cerrados" name="tipo-incidente" value="incidentes-cerrados">
+                <label for="incidentes-cerrados">Cerrado</label>
+
+                <input type="radio" id="incidentes-todos" name="tipo-incidente" value="incidentes-todos" checked>
+                <label for="incidentes-todos">Todos</label>
+            </div>
+
+        </div>
+
+        <button id="boton">Seleccionar</button>
+</div>
+
+<div class="table-container">
+
+
+</div>
+
+
+
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="/js/script_listadoIncidentes.js"></script>
+<script>
+    const opcionDropdown = document.getElementById("opcion");
+    const comunidadesContainer = document.getElementById("comunidades-container");
+    const filtrosContainer = document.getElementById("filtros");
+    const boton = document.getElementById("boton");
+    const comunidadIncidenteSelect = document.getElementById("comunidad-incidente");
+
+
+    opcionDropdown.addEventListener("change", function () {
+
+        filtrosContainer.style.display = "block";
+        boton.style.display = "block";
+
+        const selectedOption = opcionDropdown.value;
+
+        if (selectedOption === "servicios-comunidad") {
+            comunidadesContainer.style.display = "block";
+        }
+        else {
+            comunidadesContainer.style.display = "none";
+            comunidadIncidenteSelect.value = ""; // Clear the selected value
+        }
+    });
+</script>
+{{/partial}}
+
+
+{{> templates/navbar }}
